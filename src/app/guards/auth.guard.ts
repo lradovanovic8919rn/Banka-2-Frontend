@@ -8,9 +8,7 @@ import {
   UrlTree
 } from '@angular/router';
 import { Observable } from 'rxjs';
-import {LoginComponent} from "../components/login/login.component";
 import {ToastrService} from "ngx-toastr";
-import {AuthService} from "../services/auth.service";
 
 @Injectable({
   providedIn: 'root'
@@ -27,10 +25,11 @@ export class AuthGuard {
 
     if(localStorage.getItem('token') || sessionStorage.getItem('token') !== null) {
       return true;
-    } else {
+    } 
+    else {
       this.toastr.error("Morate se ulogovati prvo.")
       this.router.navigate(['/login'])
-      return false
+      return false;
     }
   }
 

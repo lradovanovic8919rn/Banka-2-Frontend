@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {environment} from "../../environments/environment";
 import {UserCreateDTO, User} from "../models/users.model";
+import { StockService } from './stock.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class UserService {
   private headers
   private token: string
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private httpClient: HttpClient, private stockService: StockService) {
 
     if(localStorage.getItem("token") !== null){
       this.token = localStorage.getItem("token")!
@@ -29,15 +30,22 @@ export class UserService {
 
   resetToken(){
     this.token = ''
+    this.stockService.resetToken();
   }
 
   setToken(token: string){
     this.token=token
+    this.stockService.setToken(this.token);
     this.headers = new HttpHeaders()
       .set('Content-Type', 'application/json')
       .set('Access-Control-Allow-Origin', '*')
       .set('Authorization', `Bearer ${token}`)
 
+
+  }
+
+  getToken(){
+    return this.token !== null
   }
 
 
@@ -53,16 +61,26 @@ export class UserService {
       { headers: this.headers })
   }
 
-  createNewUser(firstName: string, lastName: string, email: string, password: string, permissions: any, jobPosition: string,active : string, jmbg: string, phone : string
+  createNewUser(firstName: string, lastName: string, email: string, password: string, permissions: any,dailyLimit: number, jobPosition: string,  active : string, jmbg: string, phone : string
     ): Observable<any>{
     return this.httpClient.post<UserCreateDTO>(
       `${environment.apiUserServerUrl}/register`,
       {firstName: firstName, lastName:lastName, email:email, password:password
-      ,permissions: permissions, jobPosition: jobPosition, active:active, jmbg: jmbg, phone:phone},
+      ,permissions: permissions, dailyLimit: dailyLimit, jobPosition: jobPosition, active:active, jmbg: jmbg, phone:phone},
       { headers: this.headers })
   }
 
-  updateUser(id: number, email: string, permissions:[], firstName: string, lastName: string, jobPosition: string, phone: string, active: boolean): Observable<any>{
+  updateUser(
+      id: number, 
+      email: string, 
+      permissions:[], 
+      firstName: string, 
+      lastName: string, 
+      jobPosition: string, 
+      dailyLimit: number, 
+      phone: string, 
+      active: boolean
+    ): Observable<any>{
     return this.httpClient.put<any>(`${environment.apiUserServerUrl}/` + id,
       {
         email: email,
@@ -70,6 +88,7 @@ export class UserService {
         lastName: lastName,
         permissions: permissions,
         jobPosition: jobPosition,
+        dailyLimit: dailyLimit,
         active: active,
         phone: phone
       },
